@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from 'yup'
 import TextField from '@mui/material/TextField';
-import { auth } from "../../../Config/firebase";
+import { auth,db, store } from "../../../Config/firebase";
 import firebase from "../../../Config/firebase";
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -48,9 +48,29 @@ function Form1(props) {
     const createAccount = (email, password) => {
 
         auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
+            .then(async (userCredential) => {
                 // Signed in 
                 var user = userCredential.user;
+
+                var obj = {
+                    "name":"asad",
+                    email:email,
+                    password:password,
+                    userId:user.uid
+                };
+
+            //  await  db.ref('users/' + user.uid).set(obj);
+
+          await  store.collection("users").doc(user.uid).set(obj)
+            .then(() => {
+                console.log("Document successfully written!");
+            })
+            .catch((error) => {
+                console.error("Error writing document: ", error);
+            });
+
+
+
                 console.log(user)
                 toast("account create", {
                     position: "top-center",
