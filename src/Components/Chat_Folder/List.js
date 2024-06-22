@@ -1,17 +1,29 @@
 import { useEffect, useState } from "react"
 import { db, store } from "../../Config/firebase";
+import { Link } from "react-router-dom";
 
 function FirendList(){
 
     const [user, setUsers] = useState([]);
     const [requests, setRequests] = useState([]);
-    const currentUserId = "QROyEo9JhbUF4PI8bfLDr4rhAeA2"; // The current user's ID
+    const [currentUserId,setcurrentUserId]=useState("")
+    const [senderusername, setsenderusername] = useState("");
+  const [senderuseremail, setsenderuseremail] = useState("");
+    // The current user's ID
 
-    
+    const getData=async ()=>{
+        var id = localStorage.getItem("userId")
+        var username = localStorage.getItem("userName")
+        var email =localStorage.getItem("userEmail")
 
-    useEffect(async ()=>{
+        setcurrentUserId( id)
+        setsenderusername(username);
+        setsenderuseremail(email);
+
+
+
         var data =[];
-        store.collection("users").where("userId" , "!=",currentUserId ).get().then((querySnapshot) => {
+        store.collection("users").where("userId" , "!=",id ).get().then((querySnapshot) => {
            
             querySnapshot.forEach((doc) => {
                 // doc.data() is never undefined for query doc snapshots
@@ -23,7 +35,7 @@ function FirendList(){
         });
           // Fetch friend requests where current user is either the sender or the receiver
           const sentRequestsSnapshot = await store.collection("Request")
-          .where("sendId", "==", currentUserId)
+          .where("senderId", "==", id)
           .get();
 
       const sentRequests = [];
@@ -32,7 +44,7 @@ function FirendList(){
       });
 
       const receivedRequestsSnapshot = await store.collection("Request")
-          .where("recieverId", "==", currentUserId)
+          .where("recieverId", "==", id)
           .get();
 
       const receivedRequests = [];
@@ -47,12 +59,20 @@ function FirendList(){
       const filteredUsers = data.filter(user => {
           return !allRequests.some(
               request => 
-                  (request.sendId === currentUserId && request.recieverId === user.userId) || 
-                  (request.sendId === user.userId && request.recieverId === currentUserId)
+                  (request.senderId === id && request.recieverId === user.userId) || 
+                  (request.senderId === user.userId && request.recieverId === id)
           );
       });
 
+
       setUsers(filteredUsers);
+    }
+
+    
+
+    useEffect(()=>{
+        getData()
+       
 
     },[])
 
@@ -62,14 +82,16 @@ function FirendList(){
       console.log(key)
 
         var obj = {
-            "sendId":currentUserId ,
+            "senderId":currentUserId ,
+            "senderuserName" : senderusername,
+            "senderemail":senderuseremail,
             "recieverId" : user[index]["userId"],
+            "RecieveruserName" : user[index]["name"],
+            "Recieveremail":user[index]["email"],
             "Request_status" : "pending",
             "Request_id" : key,
-            "senderuserName" : "sender",
-            "senderemail":"sender email",
-            "RecieveruserName" : user[index]["name"],
-            "Recieveremail":user[index]["email"]
+           
+            
 
         }
 
@@ -93,6 +115,13 @@ function FirendList(){
 
     return(
         <>
+    <div style={{display:"flex",justifyContent:"space-around"}}>
+
+    <Link to={"/user"}>User List  Page</Link>
+    <Link to={"/Request"}>Request</Link>
+    <Link to={"/ChatList"}>Friend List  Page</Link>
+
+    </div>
         <h1 style={{textAlign:"center"}}>List of Users</h1>
         {user.map((val, index) => (
                 <div

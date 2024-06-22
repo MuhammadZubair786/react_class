@@ -141,7 +141,7 @@ function Form1(props) {
                             />
                             <ErrorMessage name="password" />
 
-                            <button type="submit">Submit</button>
+                            <button type="submit">Create Account</button>
 
                         </form>
 
@@ -149,6 +149,8 @@ function Form1(props) {
 
 
                 </Formik>
+               
+
                 <button onClick={()=>signout()}>Google signout</button>
            
                 <button onClick={()=>googleSignin()}>Google signin</button>
